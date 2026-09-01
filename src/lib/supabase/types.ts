@@ -118,6 +118,7 @@ export interface Database {
           rate: number | null;
           rate_type: RateType;
           area: string;
+          photo_url: string | null;
           is_active: boolean;
           created_at: string;
         };
@@ -130,6 +131,7 @@ export interface Database {
           rate?: number | null;
           rate_type: RateType;
           area: string;
+          photo_url?: string | null;
           is_active?: boolean;
           created_at?: string;
         };
@@ -142,6 +144,7 @@ export interface Database {
           rate?: number | null;
           rate_type?: RateType;
           area?: string;
+          photo_url?: string | null;
           is_active?: boolean;
           created_at?: string;
         };

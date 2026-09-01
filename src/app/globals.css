@@ -29,4 +29,9 @@ body {
   .input {
     @apply w-full rounded-md border border-neutral-300 bg-white px-3 py-2 text-sm text-neutral-900 outline-none focus:border-neutral-500;
   }
+
+  /* Facebook-style create-listing palette, scoped to that page. */
+  .fb-input {
+    @apply w-full rounded-md border border-[#DDDCDB] bg-white px-3 py-2 text-sm text-[#3C4044] outline-none focus:border-[#FD7B41];
+  }
 }

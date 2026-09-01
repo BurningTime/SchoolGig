@@ -33,6 +33,14 @@ export default async function ListingDetailPage({
 
   return (
     <main className="mx-auto w-full max-w-2xl flex-1 px-4 py-12">
+      {listing.photo_url && (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={listing.photo_url}
+          alt={listing.title}
+          className="mb-6 aspect-video w-full rounded-lg object-cover"
+        />
+      )}
       <p className="text-xs font-medium uppercase text-neutral-500">{categoryName}</p>
       <h1 className="mt-1 text-2xl font-semibold">{listing.title}</h1>
       <p className="mt-2 text-sm text-neutral-500">

@@ -13,7 +13,9 @@ export default async function ListingsPage({
 
   let query = supabase
     .from("service_listings")
-    .select("id, user_id, title, description, rate, rate_type, area, created_at, category_id, categories(name)")
+    .select(
+      "id, user_id, title, description, rate, rate_type, area, photo_url, created_at, category_id, categories(name)"
+    )
     .eq("is_active", true);
 
   const selectedCategory = categories?.find((c) => c.slug === params.category);
@@ -89,20 +91,30 @@ export default async function ListingsPage({
             <li key={listing.id}>
               <Link
                 href={`/listings/${listing.id}`}
-                className="block h-full rounded-md border border-neutral-200 p-4 hover:bg-neutral-50"
+                className="block h-full overflow-hidden rounded-md border border-neutral-200 hover:bg-neutral-50"
               >
-                <p className="text-xs font-medium uppercase text-neutral-500">
-                  {(listing.categories as unknown as { name: string } | null)?.name}
-                </p>
-                <p className="mt-1 font-medium">{listing.title}</p>
-                <p className="mt-1 line-clamp-2 text-sm text-neutral-600">{listing.description}</p>
-                <p className="mt-2 text-sm text-neutral-500">
-                  {listing.area}
-                  {listing.rate ? ` · ₱${listing.rate} (${listing.rate_type})` : ` · ${listing.rate_type}`}
-                </p>
-                <p className="mt-1 text-xs text-neutral-400">
-                  by {nameByUserId.get(listing.user_id) ?? "a verified student"}
-                </p>
+                {listing.photo_url && (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={listing.photo_url}
+                    alt={listing.title}
+                    className="aspect-video w-full object-cover"
+                  />
+                )}
+                <div className="p-4">
+                  <p className="text-xs font-medium uppercase text-neutral-500">
+                    {(listing.categories as unknown as { name: string } | null)?.name}
+                  </p>
+                  <p className="mt-1 font-medium">{listing.title}</p>
+                  <p className="mt-1 line-clamp-2 text-sm text-neutral-600">{listing.description}</p>
+                  <p className="mt-2 text-sm text-neutral-500">
+                    {listing.area}
+                    {listing.rate ? ` · ₱${listing.rate} (${listing.rate_type})` : ` · ${listing.rate_type}`}
+                  </p>
+                  <p className="mt-1 text-xs text-neutral-400">
+                    by {nameByUserId.get(listing.user_id) ?? "a verified student"}
+                  </p>
+                </div>
               </Link>
             </li>
           ))}
