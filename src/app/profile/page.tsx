@@ -7,6 +7,14 @@ import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import type { VerificationStatus } from "@/lib/supabase/types";
 import { VerifiedBadge } from "@/components/VerifiedBadge";
 
+interface EngagementRow {
+  id: string;
+  otherUserId: string;
+  otherName: string;
+  role: "poster" | "worker";
+  status: string;
+}
+
 export default function ProfilePage() {
   const router = useRouter();
   const [userId, setUserId] = useState<string | null>(null);
@@ -16,6 +24,7 @@ export default function ProfilePage() {
   const [courseYear, setCourseYear] = useState("");
   const [photoUrl, setPhotoUrl] = useState<string | null>(null);
   const [status, setStatus] = useState<VerificationStatus>("unverified");
+  const [engagements, setEngagements] = useState<EngagementRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -47,6 +56,36 @@ export default function ProfilePage() {
       setPhotoUrl(profile.photo_url);
     }
     setStatus(verification?.status ?? "unverified");
+
+    const { data: rawEngagements } = await supabase
+      .from("engagements")
+      .select("id, poster_id, worker_id, status")
+      .or(`poster_id.eq.${user.id},worker_id.eq.${user.id}`)
+      .order("created_at", { ascending: false });
+
+    const otherIds = (rawEngagements ?? []).map((e) =>
+      e.poster_id === user.id ? e.worker_id : e.poster_id
+    );
+    const { data: otherProfiles } =
+      otherIds.length > 0
+        ? await supabase.from("profiles").select("id, name").in("id", otherIds)
+        : { data: [] };
+    const nameById = new Map((otherProfiles ?? []).map((p) => [p.id, p.name]));
+
+    setEngagements(
+      (rawEngagements ?? []).map((e) => {
+        const isPoster = e.poster_id === user.id;
+        const otherUserId = isPoster ? e.worker_id : e.poster_id;
+        return {
+          id: e.id,
+          otherUserId,
+          otherName: nameById.get(otherUserId) ?? "(unknown)",
+          role: isPoster ? "poster" : "worker",
+          status: e.status,
+        };
+      })
+    );
+
     setLoading(false);
   }, [router]);
 
@@ -199,6 +238,30 @@ export default function ProfilePage() {
           {saving ? "Saving..." : "Save"}
         </button>
       </form>
+
+      <h2 className="mt-10 mb-3 text-sm font-semibold uppercase text-neutral-500">Engagements</h2>
+      {engagements.length === 0 ? (
+        <p className="text-sm text-neutral-500">No engagements yet.</p>
+      ) : (
+        <ul className="flex flex-col gap-2">
+          {engagements.map((e) => (
+            <li key={e.id}>
+              <Link
+                href={`/u/${e.otherUserId}`}
+                className="flex items-center justify-between gap-3 rounded-md border border-neutral-200 p-3 text-sm hover:bg-neutral-50"
+              >
+                <span>
+                  <span className="font-medium">{e.otherName}</span>
+                  <span className="ml-2 text-neutral-500">
+                    you {e.role === "poster" ? "hired them" : "were hired"}
+                  </span>
+                </span>
+                <span className="text-xs capitalize text-neutral-500">{e.status}</span>
+              </Link>
+            </li>
+          ))}
+        </ul>
+      )}
     </main>
   );
 }

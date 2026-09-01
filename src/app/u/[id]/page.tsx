@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { VerifiedBadge } from "@/components/VerifiedBadge";
+import { MessageButton } from "@/components/MessageButton";
 
 export default async function PublicProfilePage({
   params,
@@ -26,26 +27,29 @@ export default async function PublicProfilePage({
 
   return (
     <main className="mx-auto w-full max-w-2xl flex-1 px-4 py-12">
-      <div className="flex items-center gap-4">
-        {profile.photo_url ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={profile.photo_url}
-            alt={profile.name}
-            className="h-16 w-16 rounded-full object-cover"
-          />
-        ) : (
-          <div className="h-16 w-16 rounded-full bg-neutral-200" />
-        )}
-        <div>
-          <div className="flex items-center gap-2">
-            <h1 className="text-xl font-semibold">{profile.name}</h1>
-            <VerifiedBadge status={profile.is_verified ? "verified" : "unverified"} />
+      <div className="flex items-center justify-between gap-4">
+        <div className="flex items-center gap-4">
+          {profile.photo_url ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={profile.photo_url}
+              alt={profile.name}
+              className="h-16 w-16 rounded-full object-cover"
+            />
+          ) : (
+            <div className="h-16 w-16 rounded-full bg-neutral-200" />
+          )}
+          <div>
+            <div className="flex items-center gap-2">
+              <h1 className="text-xl font-semibold">{profile.name}</h1>
+              <VerifiedBadge status={profile.is_verified ? "verified" : "unverified"} />
+            </div>
+            <p className="text-sm text-neutral-500">
+              {[profile.school, profile.course_year].filter(Boolean).join(" · ")}
+            </p>
           </div>
-          <p className="text-sm text-neutral-500">
-            {[profile.school, profile.course_year].filter(Boolean).join(" · ")}
-          </p>
         </div>
+        <MessageButton otherUserId={profile.id} />
       </div>
 
       {profile.bio && <p className="mt-4 text-sm">{profile.bio}</p>}

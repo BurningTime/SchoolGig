@@ -12,6 +12,9 @@ export function Header() {
           <Link href="/listings" className="text-sm hover:underline">
             Browse
           </Link>
+          <Link href="/jobs" className="text-sm hover:underline">
+            Jobs
+          </Link>
         </div>
         <AuthStatus />
       </div>

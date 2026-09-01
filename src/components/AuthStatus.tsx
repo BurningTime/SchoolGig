@@ -73,6 +73,12 @@ export function AuthStatus() {
       <Link href="/listings/new" className="hover:underline">
         Post a listing
       </Link>
+      <Link href="/jobs/new" className="hover:underline">
+        Post a job
+      </Link>
+      <Link href="/messages" className="hover:underline">
+        Messages
+      </Link>
       <Link href="/profile" className="hover:underline">
         Profile
       </Link>
