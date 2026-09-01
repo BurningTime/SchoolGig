@@ -1,8 +1,8 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #dddcdb;
+  --foreground: #3c4044;
 }
 
 @theme inline {
@@ -12,10 +12,36 @@
   --font-mono: var(--font-geist-mono);
 }
 
+/*
+ * CampusGig brand palette, applied by remapping Tailwind's shared
+ * "neutral" scale rather than editing every component. The app's
+ * bg-neutral-900 / hover:bg-neutral-700 pair is used exclusively for
+ * primary buttons throughout the codebase, so overriding those two
+ * stops with the accent orange re-brands every primary button site-wide
+ * for free. 50-600 and 800 form a warm grey ramp anchored on the given
+ * background (#DDDCDB) and ink (#3C4044) colors, used for surfaces,
+ * borders, and secondary text everywhere else.
+ */
+@theme {
+  --color-neutral-50: #f7f6f5;
+  --color-neutral-100: #efedec;
+  --color-neutral-200: #dddcdb;
+  --color-neutral-300: #c6c4c2;
+  --color-neutral-400: #9e9c99;
+  --color-neutral-500: #7b7977;
+  --color-neutral-600: #5c5a58;
+  --color-neutral-700: #e8672f;
+  --color-neutral-800: #3c4044;
+  --color-neutral-900: #fd7b41;
+  --color-neutral-950: #2a2d2f;
+
+  --color-brand-soft: #edbf9b;
+}
+
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: #202325;
+    --foreground: #efedec;
   }
 }
 
@@ -27,7 +53,7 @@ body {
 
 @layer components {
   .input {
-    @apply w-full rounded-md border border-neutral-300 bg-white px-3 py-2 text-sm text-neutral-900 outline-none focus:border-neutral-500;
+    @apply w-full rounded-md border border-neutral-300 bg-white px-3 py-2 text-sm text-neutral-800 outline-none focus:border-neutral-900;
   }
 
   /* Facebook-style create-listing palette, scoped to that page. */
