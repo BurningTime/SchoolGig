@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { VerifiedBadge } from "@/components/VerifiedBadge";
 import { MessageButton } from "@/components/MessageButton";
+import { ReportButton } from "@/components/ReportButton";
 
 export default async function ListingDetailPage({
   params,
@@ -42,6 +43,10 @@ export default async function ListingDetailPage({
       </p>
 
       <p className="mt-6 whitespace-pre-wrap text-sm">{listing.description}</p>
+
+      <div className="mt-2">
+        <ReportButton targetType="listing" targetId={listing.id} />
+      </div>
 
       {profile && (
         <div className="mt-8 flex items-center justify-between gap-3 rounded-md border border-neutral-200 p-4">

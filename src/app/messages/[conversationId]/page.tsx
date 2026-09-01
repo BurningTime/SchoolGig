@@ -4,6 +4,7 @@ import { use, useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
+import { ReportButton } from "@/components/ReportButton";
 
 interface Message {
   id: string;
@@ -183,15 +184,15 @@ export default function ConversationThreadPage({
 
       <div className="flex flex-1 flex-col gap-2 overflow-y-auto py-2">
         {messages.map((m) => (
-          <div
-            key={m.id}
-            className={`max-w-[75%] rounded-lg px-3 py-2 text-sm ${
-              m.senderId === userId
-                ? "self-end bg-neutral-900 text-white"
-                : "self-start bg-neutral-100 text-neutral-900"
-            }`}
-          >
-            {m.body}
+          <div key={m.id} className={`flex max-w-[75%] flex-col gap-1 ${m.senderId === userId ? "self-end" : "self-start"}`}>
+            <div
+              className={`rounded-lg px-3 py-2 text-sm ${
+                m.senderId === userId ? "bg-neutral-900 text-white" : "bg-neutral-100 text-neutral-900"
+              }`}
+            >
+              {m.body}
+            </div>
+            {m.senderId !== userId && <ReportButton targetType="message" targetId={m.id} />}
           </div>
         ))}
         <div ref={bottomRef} />

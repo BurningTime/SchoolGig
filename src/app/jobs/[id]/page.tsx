@@ -4,6 +4,7 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { VerifiedBadge } from "@/components/VerifiedBadge";
 import { MessageButton } from "@/components/MessageButton";
 import { JobApplicationPanel } from "@/components/jobs/JobApplicationPanel";
+import { ReportButton } from "@/components/ReportButton";
 
 export default async function JobDetailPage({
   params,
@@ -43,6 +44,10 @@ export default async function JobDetailPage({
       </p>
 
       <p className="mt-6 whitespace-pre-wrap text-sm">{job.description}</p>
+
+      <div className="mt-2">
+        <ReportButton targetType="job" targetId={job.id} />
+      </div>
 
       {poster && (
         <div className="mt-8 flex items-center justify-between gap-3 rounded-md border border-neutral-200 p-4">

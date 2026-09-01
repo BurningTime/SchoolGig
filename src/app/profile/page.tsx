@@ -13,6 +13,14 @@ interface EngagementRow {
   otherName: string;
   role: "poster" | "worker";
   status: string;
+  hasReviewed: boolean;
+}
+
+interface ReviewRow {
+  id: string;
+  reviewerName: string;
+  rating: number;
+  comment: string | null;
 }
 
 export default function ProfilePage() {
@@ -25,6 +33,8 @@ export default function ProfilePage() {
   const [photoUrl, setPhotoUrl] = useState<string | null>(null);
   const [status, setStatus] = useState<VerificationStatus>("unverified");
   const [engagements, setEngagements] = useState<EngagementRow[]>([]);
+  const [reviews, setReviews] = useState<ReviewRow[]>([]);
+  const [busyEngagementId, setBusyEngagementId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -72,6 +82,17 @@ export default function ProfilePage() {
         : { data: [] };
     const nameById = new Map((otherProfiles ?? []).map((p) => [p.id, p.name]));
 
+    const engagementIds = (rawEngagements ?? []).map((e) => e.id);
+    const { data: myReviews } =
+      engagementIds.length > 0
+        ? await supabase
+            .from("reviews")
+            .select("engagement_id")
+            .eq("reviewer_id", user.id)
+            .in("engagement_id", engagementIds)
+        : { data: [] };
+    const reviewedEngagementIds = new Set((myReviews ?? []).map((r) => r.engagement_id));
+
     setEngagements(
       (rawEngagements ?? []).map((e) => {
         const isPoster = e.poster_id === user.id;
@@ -82,12 +103,45 @@ export default function ProfilePage() {
           otherName: nameById.get(otherUserId) ?? "(unknown)",
           role: isPoster ? "poster" : "worker",
           status: e.status,
+          hasReviewed: reviewedEngagementIds.has(e.id),
         };
       })
     );
 
+    const { data: rawReviews } = await supabase
+      .from("reviews")
+      .select("id, reviewer_id, rating, comment")
+      .eq("reviewee_id", user.id)
+      .order("created_at", { ascending: false });
+
+    const reviewerIds = [...new Set((rawReviews ?? []).map((r) => r.reviewer_id))];
+    const { data: reviewerProfiles } =
+      reviewerIds.length > 0
+        ? await supabase.from("profiles").select("id, name").in("id", reviewerIds)
+        : { data: [] };
+    const reviewerNameById = new Map((reviewerProfiles ?? []).map((p) => [p.id, p.name]));
+
+    setReviews(
+      (rawReviews ?? []).map((r) => ({
+        id: r.id,
+        reviewerName: reviewerNameById.get(r.reviewer_id) ?? "(unknown)",
+        rating: r.rating,
+        comment: r.comment,
+      }))
+    );
+
     setLoading(false);
   }, [router]);
+
+  async function markCompleted(engagementId: string) {
+    setBusyEngagementId(engagementId);
+    const supabase = createSupabaseBrowserClient();
+    await supabase.from("engagements").update({ status: "completed" }).eq("id", engagementId);
+    setEngagements((prev) =>
+      prev.map((e) => (e.id === engagementId ? { ...e, status: "completed" } : e))
+    );
+    setBusyEngagementId(null);
+  }
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect -- fetch-on-mount
@@ -245,23 +299,67 @@ export default function ProfilePage() {
       ) : (
         <ul className="flex flex-col gap-2">
           {engagements.map((e) => (
-            <li key={e.id}>
-              <Link
-                href={`/u/${e.otherUserId}`}
-                className="flex items-center justify-between gap-3 rounded-md border border-neutral-200 p-3 text-sm hover:bg-neutral-50"
-              >
-                <span>
-                  <span className="font-medium">{e.otherName}</span>
-                  <span className="ml-2 text-neutral-500">
-                    you {e.role === "poster" ? "hired them" : "were hired"}
-                  </span>
+            <li
+              key={e.id}
+              className="flex items-center justify-between gap-3 rounded-md border border-neutral-200 p-3 text-sm"
+            >
+              <Link href={`/u/${e.otherUserId}`} className="hover:underline">
+                <span className="font-medium">{e.otherName}</span>
+                <span className="ml-2 text-neutral-500">
+                  you {e.role === "poster" ? "hired them" : "were hired"}
                 </span>
-                <span className="text-xs capitalize text-neutral-500">{e.status}</span>
               </Link>
+              <div className="flex items-center gap-2">
+                {e.status === "active" && (
+                  <button
+                    disabled={busyEngagementId === e.id}
+                    onClick={() => markCompleted(e.id)}
+                    className="rounded-md border border-neutral-300 px-2 py-1 text-xs hover:bg-neutral-100 disabled:opacity-50"
+                  >
+                    Mark as completed
+                  </button>
+                )}
+                {e.status === "completed" &&
+                  (e.hasReviewed ? (
+                    <span className="text-xs text-neutral-500">Reviewed</span>
+                  ) : (
+                    <Link
+                      href={`/engagements/${e.id}/review`}
+                      className="rounded-md bg-neutral-900 px-2 py-1 text-xs text-white hover:bg-neutral-700"
+                    >
+                      Leave a review
+                    </Link>
+                  ))}
+                <span className="text-xs capitalize text-neutral-500">{e.status}</span>
+              </div>
+            </li>
+          ))}
+        </ul>
+      )}
+
+      <h2 className="mt-10 mb-3 text-sm font-semibold uppercase text-neutral-500">
+        Reviews {reviews.length > 0 && `· ${averageRating(reviews)} avg`}
+      </h2>
+      {reviews.length === 0 ? (
+        <p className="text-sm text-neutral-500">No reviews yet.</p>
+      ) : (
+        <ul className="flex flex-col gap-2">
+          {reviews.map((r) => (
+            <li key={r.id} className="rounded-md border border-neutral-200 p-3 text-sm">
+              <div className="flex items-center justify-between">
+                <span className="font-medium">{r.reviewerName}</span>
+                <span className="text-amber-500">{"★".repeat(r.rating)}{"☆".repeat(5 - r.rating)}</span>
+              </div>
+              {r.comment && <p className="mt-1 text-neutral-600">{r.comment}</p>}
             </li>
           ))}
         </ul>
       )}
     </main>
   );
+}
+
+function averageRating(reviews: ReviewRow[]) {
+  const avg = reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length;
+  return avg.toFixed(1);
 }

@@ -3,6 +3,8 @@ export type RateType = "hourly" | "fixed" | "negotiable";
 export type JobStatus = "open" | "closed" | "filled";
 export type ApplicationStatus = "pending" | "accepted" | "declined";
 export type EngagementStatus = "active" | "completed" | "cancelled";
+export type ReportTargetType = "user" | "listing" | "job" | "message";
+export type ReportStatus = "open" | "actioned" | "dismissed";
 
 export interface Database {
   public: {
@@ -16,6 +18,7 @@ export interface Database {
           course_year: string | null;
           photo_url: string | null;
           is_verified: boolean;
+          is_banned: boolean;
           created_at: string;
         };
         Insert: {
@@ -26,6 +29,7 @@ export interface Database {
           course_year?: string | null;
           photo_url?: string | null;
           is_verified?: boolean;
+          is_banned?: boolean;
           created_at?: string;
         };
         Update: {
@@ -36,6 +40,7 @@ export interface Database {
           course_year?: string | null;
           photo_url?: string | null;
           is_verified?: boolean;
+          is_banned?: boolean;
           created_at?: string;
         };
         Relationships: [];
@@ -318,10 +323,85 @@ export interface Database {
         };
         Relationships: [];
       };
+      reviews: {
+        Row: {
+          id: string;
+          engagement_id: string;
+          reviewer_id: string;
+          reviewee_id: string;
+          rating: number;
+          comment: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          engagement_id: string;
+          reviewer_id: string;
+          reviewee_id: string;
+          rating: number;
+          comment?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          engagement_id?: string;
+          reviewer_id?: string;
+          reviewee_id?: string;
+          rating?: number;
+          comment?: string | null;
+          created_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "reviews_engagement_id_fkey";
+            columns: ["engagement_id"];
+            isOneToOne: false;
+            referencedRelation: "engagements";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      reports: {
+        Row: {
+          id: string;
+          reporter_id: string;
+          target_type: ReportTargetType;
+          target_id: string;
+          reason: string;
+          status: ReportStatus;
+          handled_by: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          reporter_id: string;
+          target_type: ReportTargetType;
+          target_id: string;
+          reason: string;
+          status?: ReportStatus;
+          handled_by?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          reporter_id?: string;
+          target_type?: ReportTargetType;
+          target_id?: string;
+          reason?: string;
+          status?: ReportStatus;
+          handled_by?: string | null;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
     };
     Views: Record<string, never>;
     Functions: {
       is_admin: {
+        Args: Record<PropertyKey, never>;
+        Returns: boolean;
+      };
+      is_banned: {
         Args: Record<PropertyKey, never>;
         Returns: boolean;
       };

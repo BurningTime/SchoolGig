@@ -1,5 +1,6 @@
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 import type { Database } from "./types";
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -32,4 +33,20 @@ export async function createSupabaseServerClient() {
       },
     },
   });
+}
+
+export async function requireAdmin(supabase: Awaited<ReturnType<typeof createSupabaseServerClient>>) {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    redirect("/login");
+  }
+
+  const { data: isAdmin } = await supabase.rpc("is_admin");
+
+  if (!isAdmin) {
+    redirect("/");
+  }
 }

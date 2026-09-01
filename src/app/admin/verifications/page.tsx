@@ -1,23 +1,9 @@
-import { redirect } from "next/navigation";
-import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { createSupabaseServerClient, requireAdmin } from "@/lib/supabase/server";
 import { VerificationQueue, type PendingVerification } from "@/components/admin/VerificationQueue";
 
 export default async function AdminVerificationsPage() {
   const supabase = await createSupabaseServerClient();
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    redirect("/login");
-  }
-
-  const { data: isAdmin } = await supabase.rpc("is_admin");
-
-  if (!isAdmin) {
-    redirect("/");
-  }
+  await requireAdmin(supabase);
 
   const { data: verifications } = await supabase
     .from("verifications")

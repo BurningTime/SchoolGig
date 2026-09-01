@@ -66,7 +66,7 @@ export function AuthStatus() {
   return (
     <div className="flex items-center gap-4 text-sm">
       {isAdmin && (
-        <Link href="/admin/verifications" className="hover:underline">
+        <Link href="/admin" className="hover:underline">
           Admin
         </Link>
       )}
