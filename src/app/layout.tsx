@@ -15,12 +15,12 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "CampusGig",
+  title: "RAKET",
   description: "A verified, student-only gig board.",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "CampusGig",
+    title: "RAKET",
   },
 };
 

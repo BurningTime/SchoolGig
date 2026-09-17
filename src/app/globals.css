@@ -3,6 +3,8 @@
 :root {
   --background: #dddcdb;
   --foreground: #3c4044;
+  --accent: #fd7b41;
+  --soft-accent: #edbf9b;
 }
 
 @theme inline {
@@ -12,16 +14,6 @@
   --font-mono: var(--font-geist-mono);
 }
 
-/*
- * CampusGig brand palette, applied by remapping Tailwind's shared
- * "neutral" scale rather than editing every component. The app's
- * bg-neutral-900 / hover:bg-neutral-700 pair is used exclusively for
- * primary buttons throughout the codebase, so overriding those two
- * stops with the accent orange re-brands every primary button site-wide
- * for free. 50-600 and 800 form a warm grey ramp anchored on the given
- * background (#DDDCDB) and ink (#3C4044) colors, used for surfaces,
- * borders, and secondary text everywhere else.
- */
 @theme {
   --color-neutral-50: #f7f6f5;
   --color-neutral-100: #efedec;
@@ -38,17 +30,32 @@
   --color-brand-soft: #edbf9b;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #202325;
-    --foreground: #efedec;
-  }
+html {
+  scroll-behavior: smooth;
 }
 
 body {
+  min-height: 100vh;
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+::selection {
+  background: rgba(253, 123, 65, 0.18);
+}
+
+@keyframes fadeUp {
+  0% {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @layer components {
@@ -56,7 +63,6 @@ body {
     @apply w-full rounded-md border border-neutral-300 bg-white px-3 py-2 text-sm text-neutral-800 outline-none focus:border-neutral-900;
   }
 
-  /* Facebook-style create-listing palette, scoped to that page. */
   .fb-input {
     @apply w-full rounded-md border border-[#DDDCDB] bg-white px-3 py-2 text-sm text-[#3C4044] outline-none focus:border-[#FD7B41];
   }

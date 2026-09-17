@@ -2,10 +2,11 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 
 export function AuthStatus() {
+  const pathname = usePathname();
   const router = useRouter();
   const [userId, setUserId] = useState<string | null | undefined>(undefined);
   const [isAdmin, setIsAdmin] = useState(false);
@@ -43,19 +44,40 @@ export function AuthStatus() {
     router.refresh();
   }
 
+  function linkClass(path: string, exact = false) {
+    const isActive = exact ? pathname === path : pathname === path || pathname.startsWith(`${path}/`);
+    return `rounded-full px-3 py-2 transition hover:bg-[#FD7B41]/15 active:bg-[#FD7B41] active:text-white ${
+      isActive ? "bg-[#FD7B41] text-white" : ""
+    }`;
+  }
+
   if (userId === undefined) {
-    return <div className="h-9 w-24" />;
+    return <div className="h-9 w-64" />;
   }
 
   if (userId === null) {
     return (
-      <div className="flex items-center gap-4 text-sm">
-        <Link href="/login" className="hover:underline">
+      <div className="flex items-center gap-3 text-sm text-[#3C4044]/80">
+        <nav className="hidden items-center gap-6 md:flex">
+          <Link href="/listings" className={linkClass("/listings")}>
+            Browse
+          </Link>
+          <Link href="/jobs" className={linkClass("/jobs")}>
+            Jobs
+          </Link>
+          <Link href="/signup" className={linkClass("/signup", true)}>
+            Community
+          </Link>
+        </nav>
+        <Link
+          href="/login"
+          className={`${linkClass("/login", true)} border border-[#3C4044]/15 font-medium text-[#3C4044]`}
+        >
           Log in
         </Link>
         <Link
           href="/signup"
-          className="rounded-md bg-neutral-900 px-3 py-1.5 text-white hover:bg-neutral-700"
+          className={`${linkClass("/signup", true)} bg-[#FD7B41] font-semibold text-white shadow-[0_10px_20px_rgba(253,123,65,0.28)] hover:bg-[#ef6e31]`}
         >
           Sign up
         </Link>
@@ -64,29 +86,34 @@ export function AuthStatus() {
   }
 
   return (
-    <div className="flex items-center gap-4 text-sm">
+    <div className="flex items-center gap-3 text-sm text-[#3C4044]/80">
+      <nav className="hidden items-center gap-6 md:flex">
+        <Link href="/listings" className={linkClass("/listings")}>
+          Browse
+        </Link>
+        <Link href="/jobs" className={linkClass("/jobs")}>
+          Jobs
+        </Link>
+        <Link href="/signup" className={linkClass("/signup", true)}>
+          Community
+        </Link>
+      </nav>
       {isAdmin && (
-        <Link href="/admin" className="hover:underline">
+        <Link href="/admin" className={`hidden lg:block ${linkClass("/admin")} `}>
           Admin
         </Link>
       )}
-      <Link href="/listings/new" className="hover:underline">
-        Post a listing
-      </Link>
-      <Link href="/jobs/new" className="hover:underline">
-        Post a job
-      </Link>
-      <Link href="/messages" className="hover:underline">
-        Messages
-      </Link>
-      <Link href="/profile" className="hover:underline">
-        Profile
+      <Link
+        href="/jobs/new"
+        className={`${linkClass("/jobs/new", true)} bg-[#FD7B41] font-semibold text-white shadow-[0_10px_20px_rgba(253,123,65,0.28)] hover:bg-[#ef6e31]`}
+      >
+        Post job
       </Link>
       <button
         onClick={handleLogout}
-        className="rounded-md border border-neutral-300 px-3 py-1.5 hover:bg-neutral-100"
+        className="rounded-full border border-[#3C4044]/15 px-4 py-2 font-medium text-[#3C4044] transition hover:bg-[#FD7B41]/15 active:bg-[#FD7B41] active:text-white"
       >
-        Log out
+        Logout
       </button>
     </div>
   );
