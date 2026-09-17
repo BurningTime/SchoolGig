@@ -2,8 +2,8 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "CampusGig",
-    short_name: "CampusGig",
+    name: "RAKET",
+    short_name: "RAKET",
     description: "A verified, student-only gig board.",
     start_url: "/",
     display: "standalone",
